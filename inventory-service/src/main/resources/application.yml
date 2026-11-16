@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  data:
+    mongodb:
+      # Handling Secrets - Secure credentials management
+      uri: mongodb+srv://<user>:<password>@cluster0.mongodb.net/scm_inventory?retryWrites=true&w=majority
+  kafka:
+    bootstrap-servers: pkc-xxxx.us-east-1.aws.confluent.cloud:9092
+    consumer:
+      group-id: inventory-consumer-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<API_KEY>" password="<API_SECRET>";
+
+# // Actuator and Micrometer - App health and metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics
+		

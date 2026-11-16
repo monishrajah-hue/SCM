@@ -1,0 +1,26 @@
+!-- srcappfeaturesordersorder-dashboardorder-dashboard.component.html --
+div class=container mt-4
+  h2SCM Order Dashboardh2
+  
+  form [formGroup]=orderForm (ngSubmit)=submitOrder() class=mb-4
+    input formControlName=orderId placeholder=Order ID class=form-control mb-2
+    label
+      input type=checkbox formControlName=expedite Expedite Order
+    label
+    button type=submit [disabled]=orderForm.invalid  isLoading() class=btn btn-primary ms-2
+      Submit
+    button
+  form
+
+  @if (isLoading()) {
+    pProcessing order...p
+  } @else {
+    ul class=list-group
+      @for (order of orders(); track order.id) {
+        li class=list-group-item{{ order.id }} - {{ order.status }}li
+      } @empty {
+        li class=list-group-item text-mutedNo orders placed yet.li
+      }
+    ul
+  }
+div
