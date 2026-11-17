@@ -7,15 +7,15 @@ spring:
       # Handling Secrets - Secure credentials management
       uri: mongodb+srv://<user>:<password>@cluster0.mongodb.net/scm_inventory?retryWrites=true&w=majority
   kafka:
-    bootstrap-servers: pkc-xxxx.us-east-1.aws.confluent.cloud:9092
+    bootstrap-servers: <YOUR_REDPANDA_BOOTSTRAP_URL>:9092
     consumer:
       group-id: inventory-consumer-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     properties:
       security.protocol: SASL_SSL
-      sasl.mechanism: PLAIN
-      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<API_KEY>" password="<API_SECRET>";
+      sasl.mechanism: SCRAM-SHA-256
+      sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="<REDPANDA_USER>" password="<REDPANDA_PASSWORD>";
 
 # // Actuator and Micrometer - App health and metrics
 management:
@@ -23,4 +23,10 @@ management:
     web:
       exposure:
         include: health, metrics
+		
+# // Actuator and Micrometer - app metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 		

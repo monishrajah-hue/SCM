@@ -1,0 +1,25 @@
+<configuration>
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>https://https://logs-prod-028.grafana.net/loki/api/v1/push</url>
+            <auth>
+                <username>1886146</username>
+                <password><YOUR_GRAFANA_API_TOKEN></password>
+            </auth>
+        </http>
+        <format>
+            <label>
+                <!-- Labels index your logs in Grafana for fast searching -->
+                <pattern>app=inventory-service,host=${HOSTNAME},level=%level</pattern>
+            </label>
+            <message>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n</pattern>
+            </message>
+        </format>
+    </appender>
+
+    <!-- // Distributed Logging - Metrics, Logs, Traces -->
+    <root level="INFO">
+        <appender-ref ref="LOKI" />
+    </root>
+</configuration>

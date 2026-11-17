@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    // // Jenkins - automation server; CI/CD Concepts - continuous integration/delivery; Master-Slave Architecture - distributed builds
+    
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        DOCKER_USER = "yourdockerhubuser"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/yourusername/scm-portfolio.git'
+            }
+        }
+        
+        stage('Build & Push Order Service') {
+            steps {
+                sh "docker build -t ${DOCKER_USER}/scm-order-service:${IMAGE_TAG} ./order-service"
+                sh "docker build -t ${DOCKER_USER}/scm-order-service:latest ./order-service"
+                sh "echo \$DOCKER_HUB_CREDENTIALS_PSW | docker login -u \$DOCKER_HUB_CREDENTIALS_USR --password-stdin"
+                sh "docker push ${DOCKER_USER}/scm-order-service:${IMAGE_TAG}"
+                sh "docker push ${DOCKER_USER}/scm-order-service:latest"
+            }
+        }
+        
+        stage('Build & Push Inventory and Frontend') {
+            steps {
+                sh "docker build -t ${DOCKER_USER}/scm-inventory-service:latest ./inventory-service"
+                sh "docker build -t ${DOCKER_USER}/scm-frontend:latest ./frontend-angular"
+                sh "docker push ${DOCKER_USER}/scm-inventory-service:latest"
+                sh "docker push ${DOCKER_USER}/scm-frontend:latest"
+            }
+        }
+        
+        stage('Deploy All to K3s') {
+            steps {
+                // Deploys directly to the lightweight K3s cluster running on the EC2 instance
+                sh "kubectl apply -f devops/k8s/order-deployment.yaml"
+                sh "kubectl set image deployment/order-service order-service=${DOCKER_USER}/scm-order-service:${IMAGE_TAG}"
+                
+                sh "kubectl apply -f devops/k8s/inventory-deployment.yaml"
+                
+                sh "kubectl apply -f devops/k8s/frontend-deployment.yaml"
+                sh "kubectl rollout restart deployment scm-frontend"
+            }
+        }
+        
+        stage('Cleanup EC2 Storage') {
+            steps {
+                // Crucial for 1GB RAM / 6.8GB Disk instances to prevent K3s 'no space left on device' crashes
+                sh "docker system prune -af"
+            }
+        }
+    }
+}

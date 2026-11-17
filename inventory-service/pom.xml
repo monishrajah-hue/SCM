@@ -28,5 +28,17 @@
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
+		<!-- Prometheus for Metrics -->
+		<dependency>
+		    <groupId>io.micrometer</groupId>
+		    <artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		
+		<!-- Loki for Distributed Logging -->
+		<dependency>
+		    <groupId>com.github.loki4j</groupId>
+		    <artifactId>loki-logback-appender</artifactId>
+		    <version>1.5.0</version>
+		</dependency>
 	</dependencies>
 </project>
